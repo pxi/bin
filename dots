@@ -1,0 +1,13 @@
+#!/usr/local/bin/mksh
+
+for dir in $@; do
+	test -d "$dir" || continue
+	excl=$(realpath "$dir")/.dotignore
+	for file in $dir/*; do
+		file=$(realpath "$file")
+		name=$(basename "$file")
+		dest="$HOME/.$name"
+		grep -qs "$name" "$excl" && continue
+		ln -vs "$file" "$dest"
+	done
+done
