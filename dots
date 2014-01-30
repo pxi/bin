@@ -8,6 +8,6 @@ for dir in $@; do
 		name=$(basename "$file")
 		dest="$HOME/.$name"
 		grep -qs "$name" "$excl" && continue
-		ln -vs "$file" "$dest"
+		test -e "$dest" || ln -vs "$file" "$dest"
 	done
 done
