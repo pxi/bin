@@ -1,0 +1,36 @@
+#!/bin/sh
+
+alias scutil=/usr/sbin/scutil
+alias networksetup=/usr/sbin/networksetup
+
+sc() { echo "show $1" | scutil | sed -n "s/^  $2 : \(.*\)$/\1/p"; }
+guid=$(sc State:/Network/Global/IPv4 PrimaryService)
+iface=$(sc Setup:/Network/Service/$guid UserDefinedName)
+
+dns=$(networksetup -getdnsservers "$iface" | grep -v ^There | xargs)
+dom=$(networksetup -getsearchdomains "$iface" | grep -v ^There | xargs)
+
+for opt in ${!foreign_option_*}; do
+	val="${!opt}"
+	echo MEEP "$opt" "$val" >&2
+	part1=$(echo "$val" | cut -d ' ' -f 1)
+	test "$part1" != "dhcp-option" && continue
+	part2=$(echo "$val" | cut -d ' ' -f 2)
+	part3=$(echo "$val" | cut -d ' ' -f 3)
+	if [ "$part2" = "DNS" ]; then
+		if [ "$script_type" = "up" ]; then
+			dns="$dns $part3"
+		elif [ "$script_type" = "down" ]; then
+			dns=${dns/$part3/}
+		fi
+	elif [ "$part2" = "DOMAIN" ]; then
+		if [ "$script_type" = "up" ]; then
+			dom="$dom $part3"
+		elif [ "$script_type" = "down" ]; then
+			dom=${dom/$part3/}
+		fi
+	fi
+done
+
+networksetup -setdnsservers "$iface" ${dns:-Empty} \
+	&& networksetup -setsearchdomains "$iface" ${dom:-Empty}
