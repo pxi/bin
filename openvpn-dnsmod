@@ -12,25 +12,27 @@ dom=$(networksetup -getsearchdomains "$iface" | grep -v ^There | xargs)
 
 for opt in ${!foreign_option_*}; do
 	val="${!opt}"
-	echo MEEP "$opt" "$val" >&2
 	part1=$(echo "$val" | cut -d ' ' -f 1)
 	test "$part1" != "dhcp-option" && continue
 	part2=$(echo "$val" | cut -d ' ' -f 2)
 	part3=$(echo "$val" | cut -d ' ' -f 3)
 	if [ "$part2" = "DNS" ]; then
 		if [ "$script_type" = "up" ]; then
-			dns="$dns $part3"
+			dns=$(echo "$dns $part3" | xargs)
 		elif [ "$script_type" = "down" ]; then
-			dns=${dns/$part3/}
+			dns=$(echo "$dns" | sed 's/'"$part3"'//g' | xargs)
 		fi
 	elif [ "$part2" = "DOMAIN" ]; then
 		if [ "$script_type" = "up" ]; then
-			dom="$dom $part3"
+			dom=$(echo "$dom $part3" | xargs)
 		elif [ "$script_type" = "down" ]; then
-			dom=${dom/$part3/}
+			dom=$(echo "$dom" | sed 's/'"$part3"'//g' | xargs)
 		fi
 	fi
 done
 
-networksetup -setdnsservers "$iface" ${dns:-Empty} \
-	&& networksetup -setsearchdomains "$iface" ${dom:-Empty}
+test -z "$dns" && dns="Empty"
+test -z "$dom" && dom="Empty"
+
+networksetup -setdnsservers "$iface" $dns || exit $?
+networksetup -setsearchdomains "$iface" $dom || exit $?
