@@ -1,0 +1,10 @@
+#!/bin/sh
+
+ifaces | while read -r service; do
+	networksetup -setftpproxystate "$service" off || exit $?
+	networksetup -setwebproxystate "$service" off || exit $?
+	networksetup -setsecurewebproxystate "$service" off || exit $?
+	networksetup -setstreamingproxystate "$service" off || exit $?
+	networksetup -setgopherproxystate "$service" off || exit $?
+	networksetup -setsocksfirewallproxystate "$service" off || exit $?
+done
