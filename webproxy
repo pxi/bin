@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+	echo "usage: $(basename $0) PORT" >&2
+	exit 1
+fi
+
+port=$1; shift
+ifaces | while read -r service; do
+	networksetup -setwebproxy "$service" localhost $port off || exit $?
+	networksetup -setwebproxystate "$service" on || exit $?
+
+	networksetup -setsecurewebproxy "$service" localhost $port off || exit $?
+	networksetup -setsecurewebproxystate "$service" on || exit $?
+done
