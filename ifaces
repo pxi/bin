@@ -1,0 +1,5 @@
+#!/bin/sh
+
+networksetup -listnetworkserviceorder \
+	| grep '^([0-9]\+)' \
+	| cut -d ' ' -f 2-
