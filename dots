@@ -1,4 +1,6 @@
 #!/bin/sh
+# This script needs realpath, which is not installed on macos.
+# Use https://github.com/harto/realpath-osx.git to get it.
 
 for dir in $@; do
 	test -d "$dir" || continue
