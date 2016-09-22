@@ -1,1 +1,16 @@
 /realpath
+
+# vim-go tools and generic go utils.
+/asmfmt
+/errcheck
+/gocode
+/godef
+/gogetdoc
+/goimports
+/golint
+/gometalinter
+/gorename
+/gotags
+/guru
+/impl
+/motion
